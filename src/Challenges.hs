@@ -1,30 +1,30 @@
 module Challenges
-    ( runDays
+    ( runDay, buildDay, getInput
     ) where
 
-import Interface
+import Interface ( Result(..), Day(..), DayPart )
 import Day0
-import Control.Monad (foldM )
-import Data.String (String)
 
 
-getDay :: Int -> Day
-getDay 0 = day0
-getDay _ = NotImplementedDay
+getDayParts :: Int -> Maybe [DayPart]
+getDayParts 0 = return day0 
+getDayParts _ = Nothing
 
-runDays :: [Int] -> [Result]
-runDays = map (\i -> (runDay i . getDay) i )
+buildDay :: (Int -> IO String) -> Int -> IO Day
+buildDay f n =
+  case getDayParts n of
+    Nothing -> return $ NotImplementedDay n
+    Just parts -> do
+      dayInput <- f n    
+      return $ Day n dayInput parts
 
-getInput :: Int -> String
-getInput _ = ""
+getInput :: Int -> IO String
+getInput i = readFile ("inputs/" ++ show i)
+  
 
-runDay :: Int -> Day -> Result
-runDay i NotImplementedDay= NotImplemented i
-runDay i (Parts parts) = DayResult {
-  num=i,
-  results=map (\f -> f input) parts
-  }
+runDay :: Day -> Result
+runDay (NotImplementedDay i) = NotImplemented i
+runDay d = DayResult n $ map ( $ (input d)) (parts d)
   where
-    input = getInput i
-
+   n = num d
 

@@ -2,8 +2,8 @@ module Day0 where
 
 import Interface
 
-day0 :: Day
-day0 = Parts[
+day0 :: [DayPart]
+day0 = [
   const "hello, world!",
   const "HELLO, WORLD!"
   ]

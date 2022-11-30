@@ -5,14 +5,15 @@ import Data.List (intercalate)
 
 type DayPart = (String -> String)
 
-data Day = Parts [DayPart]
-  | NotImplementedDay
-
-
-data Result = DayResult {
+data Day = Day {
   num :: Int,
-  results :: [String]
+  input :: String,
+  parts :: [DayPart]
   }
+  | NotImplementedDay Int
+
+
+data Result = DayResult Int [String]
   | NotImplemented Int
 
 
@@ -26,10 +27,7 @@ showResults day lines = intercalate "\n" $ header : hr : tabbedLines
 
 instance Show Result where
   show (NotImplemented day) = "day " ++ show day ++ ": not implemented\n"
-  show DayResult{
-    num=dayNum,
-    results=res
-    }=showResults dayNum parts ++ "\n"
+  show (DayResult dn res) = (showResults dn parts) ++ "\n"
     where
-      parts = map ("part1: " ++) res 
+      parts = map (\(i, r) -> "part" ++ (show i) ++ ": " ++  r) (zip [1..] res)
  
