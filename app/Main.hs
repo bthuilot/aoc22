@@ -30,12 +30,14 @@ import Data.List (intercalate)
 import Control.Monad (foldM, mapM)
 
 
+-- | 'main' is the entry point for AOC 22
 main :: IO ()
 main = do
   printTitle "Advent of Code 2022"
   days <- parseArgs >>= mapM (buildDay getInput)
   printResults $ map runDay days
 
+-- | 'printTitle' prints the given string as a title to STDOUT
 printTitle :: String -> IO ()
 printTitle title = putStrLn $ "\n" ++ header ++ "\n"
   where
@@ -43,6 +45,7 @@ printTitle title = putStrLn $ "\n" ++ header ++ "\n"
     padding = replicate (length t) '#'
     header = intercalate "\n" [padding, t, padding]
 
+-- | 'printResults' will print all the results given
 printResults :: [Result] -> IO ()
 printResults = foldM (const print) ()
 
