@@ -52,8 +52,6 @@ type TestSuite = [TestCase]
 getTestInput :: Int -> IO String
 getTestInput i = readFile ("test/testcases/inputs/" ++ show i)
 
-  -- trim :: String -> String
-
 buildTestCases :: [Int] -> IO [TestCase]
 buildTestCases = mapM buildCase
   where

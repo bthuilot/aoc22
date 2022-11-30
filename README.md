@@ -22,13 +22,10 @@ $ stack run -- --days [INSERT DAY NUMBERS HERE] # ex 1 2 5 10
 To test functionaility of the project, There exists a test suite that can be run by invoking
 
 ```bash
-stack test
+$ stack test
+# Or for only testing certain days
+$ stack test --test-arguments="-d [INSERT DAY NUMBERS HERE]"
 ```
-
-The test suite is broke into two sections:
-- "integration" tests: Running, for each Day's part, the sample input on the page and checking it produces the sample output
-- "unit" tests: Tests for helper methods of each days functionaility
-
 
 ## Completed Day Index
 - [Day 0](src/Day0.hs)
