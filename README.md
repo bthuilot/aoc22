@@ -30,4 +30,5 @@ $ stack test --test-arguments="-d [INSERT DAY NUMBERS HERE]"
 ## Completed Day Index
 - [Day 0](src/Day0.hs)
   - *NOTE*: This is a test day supposed to server a placeholder until the challenge starts
+- [Day 1](src/Day01.hs)
 

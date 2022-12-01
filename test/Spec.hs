@@ -4,6 +4,7 @@ import ParseArgs
 import Challenges
 import Data.List (intercalate)
 import System.Exit
+import Debug.Trace (trace)
 
 
 -- | 'TestOutcome' represents the outcome from running a test
@@ -53,11 +54,12 @@ data Results =
 -- | 'TestCase' represents a test case in the suite for a day
 data TestCase =
   -- | 'DayTest'  represents a test for an implemented day 
-  DayTest { day :: Day -- ^ 'day' represents the implemented day
+  DayTest Day [String]
+  -- { day :: Day -- ^ 'day' represents the implemented day
           -- | 'expected' is the list of expected output for each part. 
           -- each index of 'expected' corresponds to the 'DayPart' of the same index in 'Day'
-          , expected :: [String] 
-          }
+          -- , expected :: [String] 
+          -- }
   -- | 'NonExistantDay' represents a skipped test for a day
   | NonExistantDay Int
 
@@ -75,12 +77,13 @@ buildTestSuite = mapM buildCase
   where
     getExpectedFile d i =  "test/testcases/expected/" ++ show d ++  ".part" ++ show (i + 1)
     buildCase date = do
-        fileExists <- doesFileExist ("test/testcases/inputs/" ++ show date)
-        if fileExists then do
-          d <- buildDay getTestInput date
-          expect <- mapM (readFile . getExpectedFile date) [0..(length $ parts d) -1]
-          return DayTest {day=d, expected=expect}
-          else return $ NonExistantDay date
+      d <- buildDay getTestInput date
+      case NotImplementedDay
+      fileExists <- doesFileExist ("test/testcases/inputs/" ++ show date)
+      if fileExists then do
+        expect <- mapM (readFile . getExpectedFile date) [0..(length $ parts d) -1]
+        return $ DayTest d expect
+        else return $ NonExistantDay date
 
 -- | 'runTestCase' will run a 'TestCase' and update the given results with the outcome
 runTestCase :: TestCase -> Results -> Results
@@ -89,13 +92,13 @@ runTestCase (NonExistantDay i) results = results{
   total=total results + 1 ,
   testResults=SkippedTest i : testResults results
   }
-runTestCase dt result
+runTestCase (DayTest d e) result
+  | trace (show "test") False = undefined
   | all (\(o, _, _) -> o == Passed) tests = updatedRes{success=success updatedRes + 1}
   | otherwise = updatedRes{failed=failed updatedRes + 1}
   where
-    d = (day dt)
     dayParts = parts d
-    tests = buildOutcome $ zip (map ($ input d) dayParts) (expected dt)
+    tests = buildOutcome $ zip (map ($ input d) dayParts) e
     tr = RanTest (num d) tests
     updatedRes = result{total=total result + 1 , testResults=tr : testResults result}
 

@@ -31,7 +31,7 @@ showResults day lines = intercalate "\n" $ header : hr : tabbedLines
 
 instance Show Result where
   show (NotRun day) = "day " ++ show day ++ ": not implemented\n"
-  show (DayResult dn res) = (showResults dn parts) ++ "\n"
+  show (DayResult dn res) = showResults dn parts ++ "\n"
     where
       parts = map (\(i, r) -> "part" ++ (show i) ++ ": " ++  r) (zip [1..] res)
  
