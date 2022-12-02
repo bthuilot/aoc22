@@ -1,16 +1,16 @@
 module Interface
-  (DayPart, Day(..), Result(..))
+  (Day(..), Result(..), DayPart)
 where
 
 import Data.List (intercalate)
+import GHC.IO.Handle (Handle)
 
--- | 'DayPart' represents a day's part challenege implementation
-type DayPart = (String -> String)
+type DayPart = Handle -> IO String
 
 -- | 'Day' represents a day challenge
 data Day =
   -- | 'Day' is an implemented day
-  Day Int String [DayPart]
+  Day Int Handle [DayPart]
   -- | 'NotImplementedDay' represents a day that is not defined yet
   | NotImplementedDay Int
 

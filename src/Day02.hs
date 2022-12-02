@@ -23,8 +23,8 @@ import Interface (DayPart)
 
 day02 :: [DayPart]
 day02 = [
-  show . calculateStrategyScore . parseStrategy p1Decrypter,
-  show . calculateStrategyScore . parseStrategy p2Decrypter
+--  show . calculateStrategyScore . parseStrategy p1Decrypter,
+ -- show . calculateStrategyScore . parseStrategy p2Decrypter
   ]
 
 -- | 'Shape' represents the possible shapes to throw when playing
