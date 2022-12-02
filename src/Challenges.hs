@@ -3,13 +3,13 @@ module Challenges
     ) where
 
 import Interface ( Result(..), Day(..), DayPart )
-import Day0
-import Day01 (day01)
+import Day00 ( day00 )
+import Day01 ( day01 )
 
 
 -- | 'getDayParts' will reutrn the parts for a given day number
 getDayParts :: Int -> Maybe [DayPart]
-getDayParts 0 = return day0
+getDayParts 0 = return day00
 getDayParts 1 = return day01
 getDayParts _ = Nothing
 
@@ -30,7 +30,5 @@ getInput i = readFile ("inputs/" ++ show i)
 -- | 'runDay' will run a 'Day' and return its 'Result'
 runDay :: Day -> Result
 runDay (NotImplementedDay i) = NotRun i
-runDay d = DayResult n $ map ( $ (input d)) (parts d)
-  where
-   n = num d
+runDay (Day n input parts)  = DayResult n $ map ($ input) parts
 

@@ -1,4 +1,6 @@
-module Interface where
+module Interface
+  (DayPart, Day(..), Result(..))
+where
 
 import Data.List (intercalate)
 
@@ -8,10 +10,7 @@ type DayPart = (String -> String)
 -- | 'Day' represents a day challenge
 data Day =
   -- | 'Day' is an implemented day
-  Day { num :: Int
-      , input :: String
-      , parts :: [DayPart]
-  }
+  Day Int String [DayPart]
   -- | 'NotImplementedDay' represents a day that is not defined yet
   | NotImplementedDay Int
 
@@ -22,16 +21,16 @@ data Result =
 
 -- | 'showResults' will show the results from a day's parts
 showResults :: Int -> [String] -> String
-showResults day lines = intercalate "\n" $ header : hr : tabbedLines
+showResults day outcomes = intercalate "\n" $ header : hr : tabbedLines
   where
     header = "day " ++ show day ++ ":"
     hr = replicate (length header)  '='
-    tabbedLines = map ("  " ++) lines
+    tabbedLines = map ("  " ++) outcomes
 
 
 instance Show Result where
   show (NotRun day) = "day " ++ show day ++ ": not implemented\n"
   show (DayResult dn res) = showResults dn parts ++ "\n"
     where
-      parts = map (\(i, r) -> "part" ++ (show i) ++ ": " ++  r) (zip [1..] res)
+      parts = zipWith (\i r -> "part" ++ show i ++ ": " ++ r) [1..] res
  

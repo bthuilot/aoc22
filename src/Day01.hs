@@ -1,8 +1,8 @@
-module Day01 where
+module Day01 (day01) where
 
-import Interface
-import Utils.Lists (dropAndGroup)
-import Data.List (sortBy)
+import Interface ( DayPart )
+import Utils.Lists ( dropAndGroup )
+import Data.List ( sortBy )
 
 day01 :: [DayPart]
 day01 = [

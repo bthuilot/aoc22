@@ -4,7 +4,7 @@ import ParseArgs
 import Challenges
 import Data.List (intercalate)
 import System.Exit
-import Debug.Trace (trace)
+import Control.Monad ((>=>))
 
 
 -- | 'TestOutcome' represents the outcome from running a test
@@ -19,10 +19,6 @@ instance Show TestOutcome where
 
 -- | 'DayPartOutcome' represents the 'TestOutcome' and the actual and expected output
 type DayPartOutcome = (TestOutcome, String, String)
-
--- | 'partOutcome' pulls the outcome from 'DayPartOutcome'
-partOutcome :: DayPartOutcome -> TestOutcome
-partOutcome (o, _, _) = o
   
 -- | 'TestResult' represents the result of running a day's test
 data TestResult
@@ -60,8 +56,6 @@ data TestCase =
           -- each index of 'expected' corresponds to the 'DayPart' of the same index in 'Day'
           -- , expected :: [String] 
           -- }
-  -- | 'NonExistantDay' represents a skipped test for a day
-  | NonExistantDay Int
 
 -- | 'TestSuite' reprsents the full test suite to run
 type TestSuite = [TestCase]
@@ -73,33 +67,35 @@ getTestInput i = readFile ("test/testcases/inputs/" ++ show i)
 -- | 'buildTestSuite' will build the full 'TestSuite' from a list of days to run. 
 -- returns IO since input and expected output is read from files
 buildTestSuite :: [Int] -> IO TestSuite
-buildTestSuite = mapM buildCase
-  where
-    getExpectedFile d i =  "test/testcases/expected/" ++ show d ++  ".part" ++ show (i + 1)
-    buildCase date = do
-      d <- buildDay getTestInput date
-      case NotImplementedDay
-      fileExists <- doesFileExist ("test/testcases/inputs/" ++ show date)
-      if fileExists then do
-        expect <- mapM (readFile . getExpectedFile date) [0..(length $ parts d) -1]
-        return $ DayTest d expect
-        else return $ NonExistantDay date
+buildTestSuite = mapM (buildTestDay >=> buildTestCase)
 
+buildTestDay :: Int -> IO Day
+buildTestDay date =  do
+      fileExists <- doesFileExist ("test/testcases/inputs/" ++ show date)
+      if fileExists then buildDay getTestInput date else return $ NotImplementedDay date
+
+buildTestCase :: Day -> IO TestCase
+buildTestCase d@(NotImplementedDay _) = return $ DayTest d []
+buildTestCase d@(Day date _ parts) = do
+  expected <- mapM (readFile . getExpectedFile) [0..length parts -1]
+  return $ DayTest d expected
+  where
+    getExpectedFile i =  "test/testcases/expected/" ++ show date ++  ".part" ++ show (i + 1)
+      
 -- | 'runTestCase' will run a 'TestCase' and update the given results with the outcome
 runTestCase :: TestCase -> Results -> Results
-runTestCase (NonExistantDay i) results = results{
+runTestCase (DayTest (NotImplementedDay i) _) results = results{
   skipped=skipped results + 1,
   total=total results + 1 ,
   testResults=SkippedTest i : testResults results
   }
-runTestCase (DayTest d e) result
-  | trace (show "test") False = undefined
+runTestCase (DayTest (Day i input parts) e) result
   | all (\(o, _, _) -> o == Passed) tests = updatedRes{success=success updatedRes + 1}
   | otherwise = updatedRes{failed=failed updatedRes + 1}
   where
-    dayParts = parts d
-    tests = buildOutcome $ zip (map ($ input d) dayParts) e
-    tr = RanTest (num d) tests
+    dayParts = parts
+    tests = buildOutcome $ zip (map ($ input) dayParts) e
+    tr = RanTest i tests
     updatedRes = result{total=total result + 1 , testResults=tr : testResults result}
 
 -- | 'buildOutcome' will build a list of 'DayPartOutcome' for
@@ -135,5 +131,5 @@ main = do
   testCases <- parseArgs >>= buildTestSuite
   let results = runTestSuite testCases
   _ <- printResults results
-  exitWith $ if (failed results) == 0 then ExitSuccess else ExitFailure 1
+  exitWith $ if failed results == 0 then ExitSuccess else ExitFailure 1
 

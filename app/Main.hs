@@ -21,13 +21,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 module Main (main) where
 
-import Interface
-import Challenges
+import Interface ( Result )
+import Challenges ( buildDay, getInput, runDay )
 
-import ParseArgs
+import ParseArgs ( parseArgs )
 
 import Data.List (intercalate)
-import Control.Monad (foldM, mapM)
+import Control.Monad (foldM)
 
 
 -- | 'main' is the entry point for AOC 22
