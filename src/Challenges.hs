@@ -5,12 +5,14 @@ module Challenges
 import Interface ( Result(..), Day(..), DayPart )
 import Day00 ( day00 )
 import Day01 ( day01 )
+import Day02 ( day02 )
 
 
 -- | 'getDayParts' will reutrn the parts for a given day number
 getDayParts :: Int -> Maybe [DayPart]
 getDayParts 0 = return day00
 getDayParts 1 = return day01
+getDayParts 2 = return day02
 getDayParts _ = Nothing
 
 -- | 'buildDay' will build a 'Day' from a function to retrieve its input and its date number

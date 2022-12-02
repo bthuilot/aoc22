@@ -28,7 +28,7 @@ $ stack test --test-arguments="-d [INSERT DAY NUMBERS HERE]"
 ```
 
 ## Completed Day Index
-- [Day 0](src/Day0.hs)
-  - *NOTE*: This is a test day supposed to server a placeholder until the challenge starts
-- [Day 1](src/Day01.hs)
+- [Day 0](src/Day00.hs) : *This is a test day supposed to server a placeholder until the challenge starts*
+- [Day 1](src/Day01.hs) : [challenge](https://adventofcode.com/2022/day/1)
+- [Day 2](src/Day02.hs) : [challenge](https://adventofcode.com/2022/day/2)
 

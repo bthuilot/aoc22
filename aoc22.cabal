@@ -26,6 +26,7 @@ library
       Challenges
       Day00
       Day01
+      Day02
       Interface
       ParseArgs
       Utils.Lists
