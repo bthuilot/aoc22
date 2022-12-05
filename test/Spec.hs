@@ -32,8 +32,8 @@ instance Show TestResult where
   show (RanTest i outcomes) = "day " ++ show i ++ ":\n" ++ showOutcomes
     where
       showOutcome ((o, a, e), p) = "  part " ++ show p ++ ": " ++ show o
-        -- ++ "\n  ex: '" ++ e ++ "' ac: '" ++ a ++ "'"
-        -- "^ Will show expected vs actual
+        ++ if o == Failed then  "\n  ex: '" ++ e ++ "' ac: '" ++ a ++ "'" else ""
+        -- Will show expected vs actual
       showOutcomes = intercalate "\n" $ map showOutcome (zip outcomes [1..]) 
 
 -- | 'Results' represents the outcome of running a full 'TestSuite'

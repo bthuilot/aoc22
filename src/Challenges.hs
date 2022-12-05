@@ -16,6 +16,7 @@ getDayParts 0 = return day00
 getDayParts 1 = return day01
 getDayParts 2 = return day02
 getDayParts 3 = return day03
+getDayParts 4 = return day04
 getDayParts _ = Nothing
 
 -- | 'buildDay' will build a 'Day' from a function to retrieve its input and

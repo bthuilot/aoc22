@@ -13,3 +13,7 @@ chunks :: Int -> [a] -> [[a]]
 chunks  _ [] = []
 chunks i l = take 3 l : chunks i (drop 3 l)
  
+splitOn :: (Eq a) => a -> [a] -> ([a], [a])
+splitOn x xs = (first, drop 1 second)
+  where
+    (first, second) = span (/= x) xs
