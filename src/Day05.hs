@@ -13,15 +13,17 @@ https://adventofcode.com/2022/day/5
 -}
 module Day05 ( day05 ) where
 
-import Interface ( DayPart )
+import Interface ( DayRunner )
 import Utils.Lists ( splitBy, chunks, dropEvery)
 import Data.List (transpose)
+import GHC.IO.Handle (hGetContents)
 
-day05 :: [DayPart]
-day05 = [
-  \s -> let (stack, insts) = parseInput s in getTopOfStacks $ runModel9000 stack insts,
-  \s -> let (stack, insts) = parseInput s in getTopOfStacks $ runModel9001 stack insts
-        ]
+day05 :: DayRunner
+day05 h = do
+  contents <- hGetContents h
+  return $ map (\f ->
+                  getTopOfStacks $  f (parseInput contents)
+               ) [runModel9000, runModel9001]
 
 -- | 'Instruction' is a data type for stack instructions
 data Instruction
@@ -86,13 +88,13 @@ runInstr cm stacks (Move amt from to) = preT ++ (vals ++  tS) : postT
 
 -- | 'runModel9000' will run a list of 'Instruction' on a list of 'Stack'
 -- and produce a new 'Stack' using the Model 9000's method of moving elements
-runModel9000 ::[Stack] -> [Instruction] -> [Stack]
-runModel9000 = foldl (runInstr reverse)
+runModel9000 :: ([Stack], [Instruction]) -> [Stack]
+runModel9000 (s,i) = foldl (runInstr reverse) s i
 
 -- | 'runMode9001' will run a list of 'Instruction' on a list of 'Stack'
 -- and produce a new 'Stack' using the Model 9001's method of moving elements
-runModel9001 ::[Stack] -> [Instruction] -> [Stack]
-runModel9001 = foldl (runInstr id)
+runModel9001 :: ([Stack], [Instruction]) -> [Stack]
+runModel9001 (s, i) = foldl (runInstr id) s i
 
 -- | 'getTopOfStacks' will return the 'Char' at the head of every non empty stack
 getTopOfStacks :: [Stack] -> [Char]

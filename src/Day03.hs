@@ -1,15 +1,16 @@
 module Day03 where
 
-import Interface ( DayPart )
+import Interface ( DayRunner )
 import Data.List (intersect)
 import Data.Char (ord)
 import Utils.Lists ( chunks )
+import GHC.IO.Handle (hGetContents)
 
-day03 :: [DayPart]
-day03 = [
-  show . prioritySum . part1Grouping,
-  show . prioritySum . part2Grouping
-  ]
+day03 :: DayRunner
+day03 h = do
+  contents <- hGetContents h
+  let inputs = map (flip ($) contents) [part1Grouping, part2Grouping]
+  return $ map (show . prioritySum) inputs
 
 -- | 'Rucksack' is a string of upper and lower case letters
 type Rucksack = String

@@ -1,14 +1,18 @@
 module Day04 where
 
-import Interface ( DayPart )
+import Interface ( DayRunner )
 import Utils.Lists ( splitOn )
 import Data.List ( (\\), intersect )
+import GHC.IO.Handle (hGetContents)
 
-day04 :: [DayPart]
-day04 = [
-  show . countFullyContained . parseInput,
-  show . countOverlaps . parseInput
-        ]
+day04 :: DayRunner
+day04 h = do
+  contents <- hGetContents h
+  let i = parseInput contents
+  return $ map (flip ($) i) [
+    show . countFullyContained,
+    show . countOverlaps
+    ]
 
 -- | 'Range' is a list of sequenctial integres that reprsents a range of integers
 type Range = [Int]

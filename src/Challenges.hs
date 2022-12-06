@@ -1,8 +1,8 @@
 module Challenges
-    ( runDay, buildDay, getInput
+    ( runDay, buildDay
     ) where
 
-import Interface ( Result(..), Day(..), DayPart )
+import Interface ( Result(..), Day(..), DayRunner )
 import Day00 ( day00 )
 import Day01 ( day01 )
 import Day02 ( day02 )
@@ -10,34 +10,39 @@ import Day03 ( day03 )
 import Day04 ( day04 )
 import Day05 ( day05 )
 
+import GHC.IO.IOMode (IOMode(ReadMode))
+import Data.Functor ( (<&>) )
+import System.IO ( openFile )
+import System.Directory ( doesFileExist ) 
+
 
 -- | 'getDayParts' will reutrn the parts for a given day number
-getDayParts :: Int -> Maybe [DayPart]
-getDayParts 0 = return day00
-getDayParts 1 = return day01
-getDayParts 2 = return day02
-getDayParts 3 = return day03
-getDayParts 4 = return day04
-getDayParts 5 = return day05
-getDayParts _ = Nothing
+getRunner :: Int -> DayRunner
+getRunner 0 = day00
+getRunner 1 = day01
+getRunner 2 = day02
+getRunner 3 = day03
+getRunner 4 = day04
+getRunner 5 = day05
+getRunner _ = const (return [])
 
--- | 'buildDay' will build a 'Day' from a function to retrieve its input and
--- its date number
-buildDay :: (Int -> IO String) -> Int -> IO Day
-buildDay f n =
-  case getDayParts n of
-    Nothing -> return $ NotImplementedDay n
-    Just parts -> do
-      dayInput <- f n    
-      return $ Day n dayInput parts
+-- | 'buildDay' will build a 'Day' from a function to retrieve its input and its date number
+buildDay :: Int -> Day
+buildDay n = Day n (getRunner n)
 
 -- | 'getInput' will return the input for a day based on date number
-getInput :: Int -> IO String
-getInput i = readFile ("inputs/" ++ show i)
+getInput :: Int -> String
+getInput = ("inputs/" ++) . show
   
 
 -- | 'runDay' will run a 'Day' and return its 'Result'
-runDay :: Day -> Result
-runDay (NotImplementedDay i) = NotRun i
-runDay (Day n input parts)  = DayResult n $ map ($ input) parts
+runDay :: Day -> IO Result
+runDay (Day n runner)  = do
+  let fName = getInput n
+  exists <- doesFileExist fName
+  if exists
+    -- TODO(return not run for empty days)
+    then openFile fName ReadMode >>= runner <&> DayResult n
+    else return $ NotRun n
 
+ 

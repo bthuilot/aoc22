@@ -19,13 +19,16 @@ https://adventofcode.com/2022/day/2
 -}
 module Day02 (day02) where
 
-import Interface (DayPart)
+import Interface (DayRunner)
+import GHC.IO.Handle
 
-day02 :: [DayPart]
-day02 = [
-  show . calculateStrategyScore . parseStrategy p1Decrypter,
-  show . calculateStrategyScore . parseStrategy p2Decrypter
-  ]
+day02 :: DayRunner
+day02 h = do
+  contents <- hGetContents h
+  return $ map (flip ($) contents) [
+    show . calculateStrategyScore . parseStrategy p1Decrypter,
+    show . calculateStrategyScore . parseStrategy p2Decrypter
+    ]
 
 -- | 'Shape' represents the possible shapes to throw when playing
 -- rock paper scissors
