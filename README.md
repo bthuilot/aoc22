@@ -4,7 +4,7 @@
 
 1. [Building/Running](#Buidling/Running)
 2. [Tests](#Tests)
-3. [Completed Days](#Completed Days)
+3. [Completed Days](#Completed-Days)
 
 This repositories stores my solutions in Haskell to [Advent of Code 2022](https://adventofcode.com/2022).
 
@@ -43,4 +43,5 @@ Below is an index to every completed day's implementation source code (containin
 - [Day 3](src/Day03.hs) : [challenge](https://adventofcode.com/2022/day/3)
 - [Day 4](src/Day04.hs) : [challenge](https://adventofcode.com/2022/day/4)
 - [Day 5](src/Day05.hs) : [challenge](https://adventofcode.com/2022/day/5)
+- [Day 6](src/Day06.hs) : [challenge](https://adventofcode.com/2022/day/6)
 

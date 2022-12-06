@@ -9,6 +9,7 @@ import Day02 ( day02 )
 import Day03 ( day03 )
 import Day04 ( day04 )
 import Day05 ( day05 )
+import Day06 ( day06 )
 
 import GHC.IO.IOMode (IOMode(ReadMode))
 import Data.Functor ( (<&>) )
@@ -24,6 +25,7 @@ getRunner 2 = day02
 getRunner 3 = day03
 getRunner 4 = day04
 getRunner 5 = day05
+getRunner 6 = day06
 getRunner _ = const (return [])
 
 -- | 'buildDay' will build a 'Day' from a function to retrieve its input and its date number

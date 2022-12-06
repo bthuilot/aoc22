@@ -23,7 +23,7 @@ import GHC.IO.Handle (hGetContents)
 day03 :: DayRunner
 day03 h = do
   contents <- hGetContents h
-  let inputs = map (flip ($) contents) [part1Grouping, part2Grouping]
+  let inputs = map ($ contents) [part1Grouping, part2Grouping]
   return $ map (show . prioritySum) inputs
 
 -- | 'Rucksack' is a string of upper and lower case letters
