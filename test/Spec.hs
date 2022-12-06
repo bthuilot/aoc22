@@ -4,7 +4,8 @@ import ParseArgs
 import Challenges
 import Data.List (intercalate)
 import System.Exit
-import Control.Monad ((>=>))
+import Control.Monad ((>=>), foldM)
+import System.IO (Handle, IOMode(ReadMode), openFile)
 
 
 -- | 'TestOutcome' represents the outcome from running a test
@@ -32,8 +33,8 @@ instance Show TestResult where
   show (RanTest i outcomes) = "day " ++ show i ++ ":\n" ++ showOutcomes
     where
       showOutcome ((o, a, e), p) = "  part " ++ show p ++ ": " ++ show o
-        -- ++ "\n  ex: '" ++ e ++ "' ac: '" ++ a ++ "'"
-        -- "^ Will show expected vs actual
+        ++ if o == Failed then  "\n  ex: '" ++ e ++ "' ac: '" ++ a ++ "'" else ""
+        -- Will show expected vs actual
       showOutcomes = intercalate "\n" $ map showOutcome (zip outcomes [1..]) 
 
 -- | 'Results' represents the outcome of running a full 'TestSuite'
@@ -46,69 +47,44 @@ data Results =
   testResults :: [TestResult]
   }
 
-
--- | 'TestCase' represents a test case in the suite for a day
-data TestCase =
-  -- | 'DayTest'  represents a test for an implemented day 
-  DayTest Day [String]
-  -- { day :: Day -- ^ 'day' represents the implemented day
-          -- | 'expected' is the list of expected output for each part. 
-          -- each index of 'expected' corresponds to the 'DayPart' of the same index in 'Day'
-          -- , expected :: [String] 
-          -- }
-
 -- | 'TestSuite' reprsents the full test suite to run
-type TestSuite = [TestCase]
-
--- | 'getTestInput' will read the test input file for a given day number
-getTestInput :: Int -> IO String
-getTestInput i = readFile ("test/testcases/inputs/" ++ show i)
+type TestSuite = [Day]
 
 -- | 'buildTestSuite' will build the full 'TestSuite' from a list of days to run. 
 -- returns IO since input and expected output is read from files
-buildTestSuite :: [Int] -> IO TestSuite
-buildTestSuite = mapM (buildTestDay >=> buildTestCase)
+buildTestSuite :: [Int] -> TestSuite
+buildTestSuite = map buildDay
 
-buildTestDay :: Int -> IO Day
-buildTestDay date =  do
-      fileExists <- doesFileExist ("test/testcases/inputs/" ++ show date)
-      if fileExists then buildDay getTestInput date else return $ NotImplementedDay date
-
-buildTestCase :: Day -> IO TestCase
-buildTestCase d@(NotImplementedDay _) = return $ DayTest d []
-buildTestCase d@(Day date _ parts) = do
-  expected <- mapM (readFile . getExpectedFile) [0..length parts -1]
-  return $ DayTest d expected
-  where
-    getExpectedFile i =  "test/testcases/expected/" ++ show date ++  ".part" ++ show (i + 1)
       
 -- | 'runTestCase' will run a 'TestCase' and update the given results with the outcome
-runTestCase :: TestCase -> Results -> Results
-runTestCase (DayTest (NotImplementedDay i) _) results = results{
-  skipped=skipped results + 1,
-  total=total results + 1 ,
-  testResults=SkippedTest i : testResults results
-  }
-runTestCase (DayTest (Day i input parts) e) result
-  | all (\(o, _, _) -> o == Passed) tests = updatedRes{success=success updatedRes + 1}
-  | otherwise = updatedRes{failed=failed updatedRes + 1}
+runTestCase :: Results -> Day -> IO Results
+runTestCase res d@(Day i _) = do
+  exists <- doesFileExist fName
+  if exists
+    then (openFile fName ReadMode) >>= runAndUpdate res d
+    else return $ res{total=total res + 1, skipped=skipped res + 1, testResults=testResults res ++ [SkippedTest i]}
   where
-    dayParts = parts
-    tests = buildOutcome $ zip (map ($ input) dayParts) e
-    tr = RanTest i tests
-    updatedRes = result{total=total result + 1 , testResults=tr : testResults result}
+    fName = ("test/testcases/inputs/" ++ show i)
 
--- | 'buildOutcome' will build a list of 'DayPartOutcome' for
--- each pairing of acutal and expected results
-buildOutcome :: [(String, String)] -> [DayPartOutcome]
-buildOutcome ((a, e) : xs) = (outcome, a, e) : buildOutcome xs
+
+runAndUpdate :: Results -> Day -> Handle -> IO Results
+runAndUpdate res (Day i runner) h = do
+  results <- runner h
+  ex <- mapM (readFile . getExpectedFile) [0..length results - 1]
+  let outcomes = zipWith (\a e -> (if a == e then Passed else Failed, a, e)) results ex
+  let tr = RanTest i outcomes
+  let updatedRes = res{total=total res + 1, testResults= testResults res ++ [tr]}
+  return $ if all (\(o, _, _) -> o == Passed) outcomes
+           then updatedRes{success=success res + 1}
+           else updatedRes{failed=failed res + 1}
   where
-    outcome = if a == e then Passed else Failed
-buildOutcome _ = []
+    getExpectedFile part =  "test/testcases/expected/" ++ show i  ++  ".part" ++ show (part + 1)
+    updatedRes=res{total=total res + 1}
+
 
 -- | 'runTestSuite' will run the full test suite and return the 'Results'.
-runTestSuite :: TestSuite -> Results
-runTestSuite = foldr runTestCase  baseResults
+runTestSuite :: TestSuite -> IO Results
+runTestSuite = foldM runTestCase baseResults
   where
     baseResults = Results 0 0 0 0 []
 
@@ -128,8 +104,7 @@ printResults result = putStrLn $ header ++ (foldl showDays "" $ testResults resu
 main :: IO ()
 main = do
   putStrLn "Running Test Suite"
-  testCases <- parseArgs >>= buildTestSuite
-  let results = runTestSuite testCases
+  results <- parseArgs >>= runTestSuite . buildTestSuite
   _ <- printResults results
   exitWith $ if failed results == 0 then ExitSuccess else ExitFailure 1
 

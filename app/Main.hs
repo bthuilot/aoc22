@@ -6,6 +6,7 @@ import ParseArgs ( parseArgs )
 import Data.List (intercalate)
 import Control.Monad (foldM)
 import GHC.IO.Handle (Handle)
+import Data.Functor ( (<&>) )
 import System.IO (IOMode(..), openFile)
 
 
@@ -13,7 +14,7 @@ import System.IO (IOMode(..), openFile)
 main :: IO ()
 main = do
   printTitle "Advent of Code 2022"
-  days <- parseArgs >>= mapM (buildDay getInputHandle)
+  days <- parseArgs <&> map buildDay
   results <- mapM runDay days
   printResults results
 

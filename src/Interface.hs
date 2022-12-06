@@ -12,9 +12,9 @@ type DayRunner = Handle -> IO [PartResult]
 -- | 'Day' represents a day challenge
 data Day =
   -- | 'Day' is an implemented day
-  Day Int Handle DayRunner
+  Day Int DayRunner
   -- | 'NotImplementedDay' represents a day that is not defined yet
-  | NotImplementedDay Int
+  -- | NotImplementedDay Int
 
 -- | 'Result' is the result from running a 'Day'
 data Result =
