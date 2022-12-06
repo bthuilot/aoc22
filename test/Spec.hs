@@ -1,10 +1,10 @@
 import Interface
-import System.Directory
-import ParseArgs
-import Challenges
+import System.Directory ( doesFileExist )
+import ParseArgs ( parseArgs )
+import Challenges ( buildDay )
 import Data.List (intercalate)
-import System.Exit
-import Control.Monad ((>=>), foldM)
+import System.Exit ( ExitCode(ExitFailure, ExitSuccess), exitWith )
+import Control.Monad (foldM)
 import System.IO (Handle, IOMode(ReadMode), openFile)
 
 
@@ -79,7 +79,6 @@ runAndUpdate res (Day i runner) h = do
            else updatedRes{failed=failed res + 1}
   where
     getExpectedFile part =  "test/testcases/expected/" ++ show i  ++  ".part" ++ show (part + 1)
-    updatedRes=res{total=total res + 1}
 
 
 -- | 'runTestSuite' will run the full test suite and return the 'Results'.

@@ -1,4 +1,18 @@
-module Day03 where
+{-|
+Module      : Day03
+Description : Advent of Code 2022, Day 3 implementation
+Copyright   : (c) Bryce Thuilot, 2022
+License     : GPL-3
+Maintainer  : bryce@thuilot.io
+
+For this day, both parts are parse into a list of 'RucksackGrouping' (a list of string).
+The shared character between each 'RucksackingGrouping' is found and converted to a priority, and the final sum of all priorities is returned
+
+The difference between part 1 and 2 is how elements are grouped, part 1 being split each line in half, and part 2 being group by every 3rd.
+
+https://adventofcode.com/2022/day/3
+-}
+module Day03 (day03) where
 
 import Interface ( DayRunner )
 import Data.List (intersect)

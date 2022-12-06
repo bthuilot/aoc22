@@ -5,9 +5,7 @@ import Challenges ( buildDay, runDay )
 import ParseArgs ( parseArgs )
 import Data.List (intercalate)
 import Control.Monad (foldM)
-import GHC.IO.Handle (Handle)
 import Data.Functor ( (<&>) )
-import System.IO (IOMode(..), openFile)
 
 
 -- | 'main' is the entry point for AOC 22
@@ -17,9 +15,6 @@ main = do
   days <- parseArgs <&> map buildDay
   results <- mapM runDay days
   printResults results
-
-getInputHandle :: Int -> IO Handle
-getInputHandle i = openFile ("inputs/" ++ show i) ReadMode
 
 -- | 'printTitle' prints the given string as a title to STDOUT
 printTitle :: String -> IO ()

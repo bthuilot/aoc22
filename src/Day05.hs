@@ -29,9 +29,9 @@ day05 h = do
 data Instruction
   -- | 'Move' represents a movement of items from one stack to another
   = Move 
-  Int -- 
-  Int
-  Int
+  Int -- ^ The Amount of moves to perform
+  Int -- ^ The stack to take from
+  Int -- ^ The stack to append to
 
 -- | 'Stack' is a list of characters
 type Stack = [Char]
