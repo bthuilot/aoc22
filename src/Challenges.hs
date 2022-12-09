@@ -1,6 +1,6 @@
 module Challenges
-    ( runDay, buildDay
-    ) where
+    ( runDay, buildDay)
+where
 
 import Interface ( Result(..), Day(..), DayRunner )
 import Day00 ( day00 )
@@ -10,11 +10,14 @@ import Day03 ( day03 )
 import Day04 ( day04 )
 import Day05 ( day05 )
 import Day06 ( day06 )
+import Day07 ( day07 )
+import Day08 ( day08 )
 
 import GHC.IO.IOMode (IOMode(ReadMode))
 import Data.Functor ( (<&>) )
 import System.IO ( openFile )
 import System.Directory ( doesFileExist ) 
+
 
 
 -- | 'getDayParts' will reutrn the parts for a given day number
@@ -26,6 +29,8 @@ getRunner 3 = day03
 getRunner 4 = day04
 getRunner 5 = day05
 getRunner 6 = day06
+getRunner 7 = day07
+getRunner 8 = day08
 getRunner _ = const (return [])
 
 -- | 'buildDay' will build a 'Day' from a function to retrieve its input and its date number

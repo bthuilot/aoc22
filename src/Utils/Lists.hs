@@ -14,7 +14,6 @@ chunks :: Int -> [a] -> [[a]]
 chunks  _ [] = []
 chunks i l = take 3 l : chunks i (drop 3 l)
 
-
 splitBy :: Eq a => [a] -> [a] -> ([a], [a])
 splitBy _ [] = ([], [])
 splitBy p l@(x : xs)
@@ -33,7 +32,26 @@ splitOn x xs = (first, drop 1 second)
   where
     (first, second) = span (/= x) xs
 
+-- splitAt
+
 dropEvery :: Int -> [a] -> [a]
 dropEvery _ [] = []
 dropEvery i l = take (i - 1) l ++ dropEvery i (drop i l)
-  
+
+removeAt :: Int -> [a] -> [a]
+removeAt _ [] =[]
+removeAt 0 (_ : xs) = xs
+removeAt i (x : xs) = x : removeAt (i - 1) xs
+
+updateAt :: Int -> (a -> a) -> [a] -> [a]
+updateAt _ _ [] = []
+updateAt 0 f (x : xs) = f x : xs
+updateAt i f (x : xs) = x : updateAt (i - 1) f xs
+
+updateFirstWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
+updateFirstWhere _ _ [] = []
+updateFirstWhere p f (x : xs)
+  | p x = f x : xs
+  | otherwise = x : recur
+  where
+    recur = updateFirstWhere p f xs
