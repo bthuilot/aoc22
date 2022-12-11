@@ -12,7 +12,7 @@ dropAndGroup p (x : xs)= (x : ys) : rest
 -- | 'chunks' will chunk a list into groups of the given size
 chunks :: Int -> [a] -> [[a]]
 chunks  _ [] = []
-chunks i l = take 3 l : chunks i (drop 3 l)
+chunks i l = take i l  : chunks i (drop i l)
 
 splitBy :: Eq a => [a] -> [a] -> ([a], [a])
 splitBy _ [] = ([], [])
