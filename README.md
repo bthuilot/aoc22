@@ -46,4 +46,8 @@ Below is an index to every completed day's implementation source code (containin
 - [Day 6](src/Day06.hs) : [challenge](https://adventofcode.com/2022/day/6)
 - [Day 7](src/Day07.hs) : [challenge](https://adventofcode.com/2022/day/7)
 - [Day 8](src/Day08.hs) : [challenge](https://adventofcode.com/2022/day/8)
+- [Day 9](src/Day09.hs) : [challenge](https://adventofcode.com/2022/day/9)
+- [Day 10](src/Day10.hs) : [challenge](https://adventofcode.com/2022/day/10)
+- [Day 11](src/Day11.hs) : [challenge](https://adventofcode.com/2022/day/11)
+
 
