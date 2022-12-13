@@ -5,13 +5,15 @@ Copyright   : (c) Bryce Thuilot, 2022
 License     : GPL-3
 Maintainer  : bryce@thuilot.io
 
+Solution is a little hacky in places but works!
+
 https://adventofcode.com/2022/day/11
 -}
 module Day11 ( day11 ) where
 
 import Interface ( DayRunner )
 import GHC.IO.Handle (hGetContents)
-import Data.List (sort, sortBy)
+import Data.List (sortBy)
 import Utils.Lists (splitOnAll)
 import Data.Maybe (fromJust, isNothing)
 import Debug.Trace ()
@@ -27,25 +29,20 @@ day11 h = do
     performRounds 10000 msP2
     ]
 
+type Op = Int -> Int
 
-type Op = Integer -> Integer
+type Item = Int
 
 data Monkey = M {
-  items :: [Integer],
+  items :: [Item],
   op :: Op,
-  test :: (Integer, Int, Int),
+  test :: (Int, Int, Int),
   inspected :: Int
 }
 
-showMM :: Monkey -> String
-showMM M{items=is, test=ts, op=p, inspected=i} = show is ++ "  " ++ show ts ++ " " ++ " | "++show i 
-
-showM :: Monkeys -> String
-showM = Map.foldlWithKey (\a i m -> show i ++ " " ++ showMM m ++ "\n" ++ a) ""
-
 type Monkeys = Map.Map Int Monkey
 
-performTest :: Monkey -> Integer -> Int
+performTest :: Monkey -> Item -> Int
 performTest M{test=(d,t,f)} i
   | i `rem` d == 0 = t
   | otherwise = f
@@ -67,15 +64,11 @@ parseMonkey o [_, startStr, opStr, test, testT, testF]
   }
 parseMonkey _ _ = error "invalid input"
 
-parseStartItems :: String -> [Integer]
-parseStartItems s
-  -- | trace (show s) False = undefined
-  | otherwise = (map read . splitOnAll ", " . drop 18) s
+parseStartItems :: String -> [Int]
+parseStartItems = map read . splitOnAll ", " . drop 18
 
-parseOperation :: String -> (Integer -> Integer)
-parseOperation s
-  -- | trace (show s) False = undefined
-  | otherwise = \old -> parseOp o old (parseVal old valS)
+parseOperation :: String -> (Int -> Int)
+parseOperation s = \old -> parseOp o old (parseVal old valS)
   where
     (o, valS) = splitAt 1 $ drop 23 s
     parseVal old " old" = old
@@ -83,7 +76,7 @@ parseOperation s
     parseOp "+" = (+)
     parseOp _ = (*)
 
-parseTest :: (String, String, String) -> (Integer, Int, Int)
+parseTest :: (String, String, String) -> (Int, Int, Int)
 parseTest (pS, tS, fS) = (p,t,f)
   where
     p = read $ drop 21 pS
@@ -94,30 +87,27 @@ countInspected :: Monkeys -> [Int]
 countInspected = sortBy (flip compare) . Map.foldl (\l m -> inspected m : l) []
 
 performRounds :: Int -> Monkeys -> Monkeys
-performRounds 0 ms = ms
-performRounds i ms
-  -- | trace (showM ms) False = undefined
-  | otherwise = performRounds (i - 1) ms'
+performRounds rounds ms = performRounds' rounds ms
   where
-    ms' = performTurns 0 ms
+    maxI = Map.foldl (\p M{test=(d,_,_)} ->p * d) 1 ms
+    performRounds' 0 ms' = ms' 
+    performRounds' i ms' = performRounds (i - 1) $ performTurns maxI 0 ms'
 
-performTurns :: Int -> Monkeys -> Monkeys
-performTurns i ms
+performTurns :: Int -> Int -> Monkeys -> Monkeys
+performTurns maxI i ms
   | not $ Map.member i ms = ms
-  | otherwise = performTurns (i + 1) ms'
+  | otherwise = performTurns maxBound (i + 1) ms'
   where
-    (m', passedItems) = inspectItems ((Map.!) ms i)
+    (m', passedItems) = inspectItems maxI ((Map.!) ms i)
     ms' = passItems (Map.insert i m' ms) passedItems
 
 
-inspectItems :: Monkey -> (Monkey, [(Int, Integer)])
-inspectItems m
-  -- | trace (show thrownItems) False = undefined
-  | otherwise = (m{items=[], inspected=inspected m + length thrownItems}, thrownItems)
+inspectItems :: Int -> Monkey -> (Monkey, [(Int, Item)])
+inspectItems maxI m = (m{items=[], inspected=inspected m + length thrownItems}, thrownItems)
   where
-    thrownItems = map (\i -> let i' = op m i in (performTest m i', i')) (items m)
+    thrownItems = map (\i -> let i' = op m i `rem` maxI in (performTest m i', i')) (items m)
 
-passItems :: Monkeys -> [(Int, Integer)] -> Monkeys
+passItems :: Monkeys -> [(Int, Item)] -> Monkeys
 passItems ms [] = ms
 passItems ms ((mNum, i) : is)
   | isNothing maybeM = passItems ms is
