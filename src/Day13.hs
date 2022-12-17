@@ -18,43 +18,59 @@ import qualified Data.ByteString.Lazy as LB
 import Data.Aeson ( decode, Value(..))
 import Data.Maybe ( fromMaybe )
 import qualified Data.Vector as V
+import Data.List (sortBy)
 
 
-type PacketPair = (Value, Value)
-
+type Packet = Value
 
 day13 :: DayRunner
 day13 h = do
   contents <- B.hGetContents h
-  let vals = parseContents contents
-  return [show $ snd $ foldl (\(i, acc) p -> (i + 1, if compareData p == LT then i+acc else acc)) (1, 0) vals]
+  let vals = parsePackets contents
+  return [
+    show $ sortPairs vals,
+    show $ fst $ foldl (\(acc, ps) p ->
+                           let
+                             (i, ps') = insertPacket p ps
+                           in (acc * i, ps')
+                       ) (1, sortBy compareData vals) dividerPackets
+    ]
 
 
-splitOnSubstring :: B.ByteString -> B.ByteString -> [B.ByteString]
-splitOnSubstring sub s
-  | B.null end = [start]
-  | otherwise = start :  splitOnSubstring sub end
+dividerPackets :: [Value]
+dividerPackets = [
+  Array (V.singleton $ Array (V.singleton $ Number 2)),
+  Array (V.singleton $ Array (V.singleton $ Number 6))
+  ]
+
+sortPairs :: [Value] -> Int
+sortPairs = sortPairs' (1, 0)
   where
-    (start, end') = B.breakSubstring sub s
-    end = B.drop 2 end'
+    sortPairs' (i, acc) (p1 : p2 : xs) = sortPairs' (i + 1, acc + if compareData p1 p2 == LT then i else 0) xs
+    sortPairs' (_, acc) _ = acc
 
-parseContents :: B.ByteString -> [PacketPair]
-parseContents = map parsePair . splitOnSubstring "\n\n"
+parsePackets :: B.ByteString -> [Value]
+parsePackets = map parsePacket . filter (not . B.null) . B.split 10 
+
+
+insertPacket :: Packet -> [Packet] -> (Int, [Packet])
+insertPacket = insertElement' 1
   where
-    parsePair s = let (l, r) = B.breakSubstring "\n" s in (parsePacket l, parsePacket r)
-
+    insertElement' i v [] = (i, [v])
+    insertElement' i v ps@(p : ps')
+      = case compareData v p of
+          GT -> let (i', l) = insertElement' (i + 1) v ps' in (i', p : l)
+          _ -> (i, v : ps)
 
 parsePacket :: B.ByteString -> Value
 parsePacket = fromMaybe Null . decode . LB.fromStrict
 
-
-
-compareData :: PacketPair -> Ordering
-compareData (Number l, Number r) = compare l  r
-compareData (Array l, r@(Number _)) = compareItems l (V.singleton r)
-compareData (l@(Number _), Array r) = compareItems (V.singleton l) r
-compareData (Array l, Array r) = compareItems l r
-compareData _ = EQ
+compareData :: Packet -> Packet -> Ordering
+compareData (Number l) (Number r) = compare l  r
+compareData (Array l) (Array r) = compareItems l r
+compareData (Array l) r@(Number _) = compareItems l (V.singleton r)
+compareData l@(Number _) (Array r) = compareItems (V.singleton l) r
+compareData _ _ = EQ
 
 
 
@@ -67,5 +83,5 @@ compareItems l r
   | otherwise = order
     where
       (lHead, rHead) = (V.head l, V.head r)
-      order = compareData (lHead, rHead)
+      order = compareData lHead rHead
       
