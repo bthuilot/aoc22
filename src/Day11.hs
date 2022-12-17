@@ -18,12 +18,14 @@ import Utils.Lists (splitOnAll)
 import Data.Maybe (fromJust, isNothing)
 import Debug.Trace ()
 import qualified Data.Map.Strict as Map
+import Control.Monad (join)
+import Data.Bifunctor (Bifunctor(bimap))
 
 
 day11 :: DayRunner
 day11 h = do
   contents <- hGetContents h
-  let [msP1, msP2] = map (parseInput contents) [(`div` 3), id]
+  let (msP1, msP2) = join bimap (parseInput contents) ((`div` 3), id)
   return $ map (show . product . take 2 . countInspected) [
     performRounds 20 msP1,
     performRounds 10000 msP2

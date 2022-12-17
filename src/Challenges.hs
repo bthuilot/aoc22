@@ -15,6 +15,7 @@ import Day08 ( day08 )
 import Day09 ( day09 )
 import Day10 ( day10 )
 import Day11 ( day11 )
+import Day12 ( day12 )
 import Day13 ( day13 )
 
 import GHC.IO.IOMode (IOMode(ReadMode))
@@ -38,6 +39,7 @@ getRunner 8 = day08
 getRunner 9 = day09
 getRunner 10 = day10
 getRunner 11 = day11
+getRunner 12 = day12
 getRunner 13 = day13
 getRunner _ = const (return [])
 
