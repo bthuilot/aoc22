@@ -6,4 +6,3 @@ system-ghc: true
 packages:
 - .
 
-
