@@ -20,9 +20,9 @@ day12 :: DayRunner
 day12 h = do
   contents <- hGetContents h
   let g@(G _ s s' _ _) = parseGraph contents
-  return [
-    show $ shortestPath (S.singleton s) g [(s, 0)],
-    show $ minimum $ filter (/= 0)  $ map (\p -> shortestPath (S.singleton p) g [(p, 0)]) s'
+  return $ map show [
+    distanceToService g s,
+    minimum $ filter (/= 0)  $ map (distanceToService g) s'
     ]
    
 
@@ -45,6 +45,9 @@ data Graph
   Bounds
   deriving (Show, Eq)
 
+
+distanceToService :: Graph -> Point -> Int
+distanceToService g p = shortestPath (S.singleton p) g [(p, 0)]
 
 parseGraph :: String -> Graph
 parseGraph s = parseGraph' start (0,0) l
