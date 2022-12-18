@@ -15,6 +15,7 @@ import GHC.IO.Handle (hGetContents)
 import Data.Char (isDigit)
 import Utils.Lists (splitBy)
 import Data.Bifunctor ( bimap )
+import Debug.Trace (trace)
 
 
 day15 :: DayRunner
@@ -24,8 +25,8 @@ day15 h = do
   print (p2Bound :: Int)
   let rs = countEmpty p1Row signal
   return [
-    show $ rangesLen rs
-    -- show 0
+    show $ rangesLen rs,
+    show $ tuningFreq $ head $  getPossiblePoints (0, p2Bound) signal
     ]
 
 type Point = (Int, Int)
@@ -93,5 +94,33 @@ splitRange r@(x,y) i
   | otherwise = [(x, i - 1), (i + 1, y)]
 
 
+subOverlap :: [Range] -> Range -> [Range]
+subOverlap [] _ = []
+subOverlap (b@(bX, bY) : bs) s@(sX, sY)
+  | sX <= bX && sY >= bY = recur
+  | sX > bX && sY < bY = (bX, sX - 1) : (sY + 1, bY) : recur
+  | sX > bX && sY >= bY = (bX, sX - 1) : recur
+  | sY < bY && sX <= bX = (sY + 1, bY) : recur
+  | trace (show b) False = undefined
+  | otherwise = b : recur
+  where
+    recur = subOverlap bs s
 
--- findBeacon :: (Int, Int) -> Int -> 
+
+rangesToPoints :: Int -> [Range] -> [Point]
+rangesToPoints _ [] = []
+rangesToPoints y ((l, u) : rs) = foldl (\acc x -> (x,y) : acc) recur [l..u]
+  where
+    recur = rangesToPoints y rs
+
+
+getPossiblePoints :: Range -> [Signal] -> [Point]
+getPossiblePoints r@(l,u) s = filter (isNotBeacon s) allPoints
+  where
+    pointsAtY y = rangesToPoints y $ foldl subOverlap [r] (countEmpty y s)
+    allPoints = foldl (\acc y -> pointsAtY y ++ acc) [] [l..u]
+    isNotBeacon [] _ = True
+    isNotBeacon ((_, b, _): bs) p = p /= b && isNotBeacon bs p
+
+tuningFreq :: Point -> Int
+tuningFreq (x, y) = x * 4000000 + y
