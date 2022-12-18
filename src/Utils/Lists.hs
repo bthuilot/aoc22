@@ -32,7 +32,6 @@ splitOn x xs = (first, drop 1 second)
   where
     (first, second) = span (/= x) xs
 
--- splitAt
 
 dropEvery :: Int -> [a] -> [a]
 dropEvery _ [] = []
