@@ -15,22 +15,20 @@ import GHC.IO.Handle (hGetContents)
 import Data.Char (isDigit)
 import Utils.Lists (splitBy)
 import Data.Bifunctor ( bimap )
-import Debug.Trace
 
 
 day15 :: DayRunner
 day15 h = do
   contents <- hGetContents h
-  let (row, (signal, _)) = bimap read parseSignals $ splitBy "\n\n" contents
-  let rs = countEmpty row signal
+  let (p1Row, (p2Bound, signal)) = bimap read (bimap read parseSignals . splitBy "\n\n") $ splitBy "\n\n" contents
+  print (p2Bound :: Int)
+  let rs = countEmpty p1Row signal
   return [
     show $ rangesLen rs
     -- show 0
     ]
 
 type Point = (Int, Int)
-
-type Bounds = (Point, Point)
 
 type Distance = Int
 
@@ -40,28 +38,22 @@ type Range = (Int, Int)
 
 type Ranges = [Range]
 
-parseSignals :: String -> ([Signal], Bounds)
-parseSignals = foldl parseSignal ([], ((0,0), (0,0))) . lines
+parseSignals :: String -> [Signal]
+parseSignals = foldl parseSignal [] . lines
 
-parseSignal :: ([Signal], Bounds) -> String -> ([Signal], Bounds)
-parseSignal (acc, b) s = (sig : acc, b')
+parseSignal :: [Signal] -> String -> [Signal]
+parseSignal acc s = sig : acc
   where
-    (sig, b') = buildSignal b $ parseSignal' s
+    sig = buildSignal $ parseSignal' s
     parseSignal' =  map read . filter (not . null) . map (filter intChar) . words
     intChar c =  isDigit c || c == '-'
 
-updateBounds :: Bounds -> Point -> Bounds
-updateBounds ((sX, sY), (eX, eY)) (x, y) = ((min sX x, min sY y), (max eX x, max eY y))
-
-
-buildSignal :: Bounds -> [Int] -> (Signal, Bounds)
-buildSignal b [sX, sY, bX, bY] = (s, b')
+buildSignal :: [Int] -> Signal
+buildSignal [sX, sY, bX, bY] = (sP, bP, calcNycDis sP bP)
   where
     sP = (sX, sY)
     bP = (bX, bY)
-    s = (sP, bP, calcNycDis sP bP)
-    b' = foldl updateBounds b [sP, bP]
-buildSignal _ _ = error "invalid input"
+buildSignal _ = error "invalid input"
 
 -- get it
 calcNycDis :: Point -> Point -> Int
@@ -71,7 +63,6 @@ countEmpty :: Int -> [Signal] -> Ranges
 countEmpty _ [] = []
 countEmpty i (((x, y), (bX, bY), d) : ss)
   | d < h = recur
-  | trace ((show $ bY == i) ++ " " ++ show amt) False = undefined
   | otherwise = foldr insertRange l recur
   where
     h = abs(i - y)
